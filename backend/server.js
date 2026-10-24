@@ -40,6 +40,58 @@ app.get("/foods", async (req, res) => {
   }
 });
 
+
+ // Specific food ki ID receive karne ke liye GET API
+
+ // Specific food item database se hasil karne ke liye GET API
+app.get("/foods/:id", async (req, res) => {
+
+  try {
+
+    // URL se food ki ID number mein convert kar rahe hain
+    const foodId = Number(req.params.id);
+
+    // Check kar rahe hain ke ID valid positive integer hai
+    if (!Number.isSafeInteger(foodId) || foodId <= 0) {
+      return res.status(400).json({
+        error: "Invalid food ID"
+      });
+    }
+
+    // PostgreSQL se sirf matching ID wala food hasil kar rahe hain
+    const result = await pool.query(
+      "SELECT * FROM foods WHERE id = $1",
+      [foodId]
+    );
+
+    // Agar matching food nahi mila toh 404 response bhej rahe hain
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Food not found"
+      });
+    }
+
+    // Matching food ka pehla record JSON mein bhej rahe hain
+    res.json(result.rows[0]);
+
+  } catch (error) {
+
+    // Database error terminal mein show kar rahe hain
+    console.error("Database error:", error.message);
+
+    // Browser ko server error response bhej rahe hain
+    res.status(500).json({
+      error: "Something went wrong"
+    });
+
+  }
+
+});
+
+
+
+
+
 // Server ka port .env se le rahe hain
 const PORT = process.env.PORT || 5000;
 
