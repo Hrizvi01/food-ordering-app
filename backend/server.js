@@ -134,6 +134,122 @@ app.post("/foods", async (req, res) => {
 
 });
 
+
+
+
+ // Existing food item ko update karne ke liye PUT API
+app.put("/foods/:id", async (req, res) => {
+
+  try {
+
+    // URL se food ki ID number mein convert kar rahe hain
+    const foodId = Number(req.params.id);
+
+    // Request body se naya naam aur price le rahe hain
+    const { name, price } = req.body;
+
+    // Check kar rahe hain ke food ID valid hai
+    if (!Number.isSafeInteger(foodId) || foodId <= 0) {
+      return res.status(400).json({
+        error: "Invalid food ID"
+      });
+    }
+
+    // Check kar rahe hain ke naam sahi text hai
+    if (typeof name !== "string" || name.trim() === "") {
+      return res.status(400).json({
+        error: "Valid food name required"
+      });
+    }
+
+    // Check kar rahe hain ke price positive number hai
+    if (typeof price !== "number" || !Number.isFinite(price) || price <= 0) {
+      return res.status(400).json({
+        error: "Valid price required"
+      });
+    }
+
+    // PostgreSQL mein matching food update kar rahe hain
+    const result = await pool.query(
+      "UPDATE foods SET name = $1, price = $2 WHERE id = $3 RETURNING *",
+      [name.trim(), price, foodId]
+    );
+
+    // Agar matching food nahi mila toh 404 bhej rahe hain
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Food not found"
+      });
+    }
+
+    // Updated food item response mein bhej rahe hain
+    res.json(result.rows[0]);
+
+  } catch (error) {
+
+    // Error terminal mein show kar rahe hain
+    console.error("Update error:", error.message);
+
+    // Server error ka response bhej rahe hain
+    res.status(500).json({
+      error: "Food update nahi ho saka"
+    });
+
+  }
+
+});
+
+
+ // Existing food item delete karne ke liye DELETE API
+app.delete("/foods/:id", async (req, res) => {
+
+  try {
+
+    // URL se food ki ID number mein convert kar rahe hain
+    const foodId = Number(req.params.id);
+
+    // Check kar rahe hain ke ID valid hai
+    if (!Number.isSafeInteger(foodId) || foodId <= 0) {
+      return res.status(400).json({
+        error: "Invalid food ID"
+      });
+    }
+
+    // PostgreSQL se matching food delete kar rahe hain
+    const result = await pool.query(
+      "DELETE FROM foods WHERE id = $1 RETURNING *",
+      [foodId]
+    );
+
+    // Agar matching food nahi mila toh 404 bhej rahe hain
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Food not found"
+      });
+    }
+
+    // Successfully deleted food ka response bhej rahe hain
+    res.json({
+      message: "Food deleted successfully",
+      food: result.rows[0]
+    });
+
+  } catch (error) {
+
+    // Database error terminal mein show kar rahe hain
+    console.error("Delete error:", error.message);
+
+    // Server error ka response bhej rahe hain
+    res.status(500).json({
+      error: "Food delete nahi ho saka"
+    });
+
+  }
+
+});
+
+
+
 // Server ka port .env se le rahe hain
 const PORT = process.env.PORT || 5000;
 
