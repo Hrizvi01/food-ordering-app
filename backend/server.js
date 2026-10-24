@@ -23,70 +23,120 @@ app.get("/", (req, res) => {
 });
 
 // Foods database se hasil karne ke liye GET API
+
+ // Food items ko search karne ke liye GET API
 app.get("/foods", async (req, res) => {
-  try {
-    // PostgreSQL se tamam food items mangwa rahe hain
-    const result = await pool.query("SELECT * FROM foods");
-
-    // Database ke records JSON mein browser ko bhej rahe hain
-    res.json(result.rows);
-
-  } catch (error) {
-    // Agar database query fail ho toh error log kar rahe hain
-    console.error("Database error:", error.message);
-
-    // Browser ko server error response bhej rahe hain
-    res.status(500).json({ error: "Foods load nahi ho sake" });
-  }
-});
-
-
- // Specific food ki ID receive karne ke liye GET API
-
- // Specific food item database se hasil karne ke liye GET API
-app.get("/foods/:id", async (req, res) => {
 
   try {
 
-    // URL se food ki ID number mein convert kar rahe hain
-    const foodId = Number(req.params.id);
+    // URL se search parameter hasil kar rahe hain
+    const search = req.query.search || "";
 
-    // Check kar rahe hain ke ID valid positive integer hai
-    if (!Number.isSafeInteger(foodId) || foodId <= 0) {
+    // Check kar rahe hain ke search text hai
+    if (typeof search !== "string") {
       return res.status(400).json({
-        error: "Invalid food ID"
+        error: "Invalid search value"
       });
     }
 
-    // PostgreSQL se sirf matching ID wala food hasil kar rahe hain
+    // PostgreSQL se matching foods hasil kar rahe hain
     const result = await pool.query(
-      "SELECT * FROM foods WHERE id = $1",
-      [foodId]
+      "SELECT * FROM foods WHERE name ILIKE $1 ORDER BY id",
+      [`%${search}%`]
     );
 
-    // Agar matching food nahi mila toh 404 response bhej rahe hain
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        error: "Food not found"
-      });
-    }
-
-    // Matching food ka pehla record JSON mein bhej rahe hain
-    res.json(result.rows[0]);
+    // Matching food items JSON mein return kar rahe hain
+    res.json(result.rows);
 
   } catch (error) {
 
     // Database error terminal mein show kar rahe hain
-    console.error("Database error:", error.message);
+    console.error("Search error:", error.message);
 
-    // Browser ko server error response bhej rahe hain
+    // Server error response bhej rahe hain
     res.status(500).json({
-      error: "Something went wrong"
+      error: "Foods load nahi ho sake"
     });
 
   }
 
 });
+
+
+
+ // Specific food ki ID receive karne ke liye GET API
+
+ // Specific food item database se hasil karne ke liye GET API
+
+ 
+ // Food items ko search aur price ke hisaab se filter karne wali API
+app.get("/foods", async (req, res) => {
+
+  try {
+
+    // URL se search aur maxPrice hasil kar rahe hain
+    const search = req.query.search || "";
+    const maxPrice = req.query.maxPrice;
+
+    // Search value ka type check kar rahe hain
+    if (typeof search !== "string") {
+      return res.status(400).json({
+        error: "Invalid search value"
+      });
+    }
+
+    // Pehle SQL query aur uski values prepare kar rahe hain
+    let query = "SELECT * FROM foods WHERE name ILIKE $1";
+    const values = [`%${search}%`];
+
+    // Agar maxPrice di gayi hai toh price filter add karenge
+    if (maxPrice !== undefined) {
+
+      // Price ko number mein convert kar rahe hain
+      const price = Number(maxPrice);
+
+      // Check kar rahe hain ke price valid hai
+      if (
+        typeof maxPrice !== "string" ||
+        maxPrice.trim() === "" ||
+        !Number.isFinite(price) ||
+        price < 0
+      ) {
+        return res.status(400).json({
+          error: "Invalid maximum price"
+        });
+      }
+
+      // SQL query mein price ki condition add kar rahe hain
+      query += " AND price <= $2";
+
+      // Doosri SQL value mein maximum price rakh rahe hain
+      values.push(price);
+    }
+
+    // Foods ko ID ke hisaab se arrange kar rahe hain
+    query += " ORDER BY id";
+
+    // PostgreSQL mein query execute kar rahe hain
+    const result = await pool.query(query, values);
+
+    // Matching food items return kar rahe hain
+    res.json(result.rows);
+
+  } catch (error) {
+
+    // Error ki details terminal mein show kar rahe hain
+    console.error("Filter error:", error.message);
+
+    // Server error response bhej rahe hain
+    res.status(500).json({
+      error: "Foods load nahi ho sake"
+    });
+
+  }
+
+});
+
 
 
  // Naya food item add karne ke liye POST API
