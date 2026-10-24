@@ -1,0 +1,17 @@
+
+# Dependencies GitHub par upload nahi karni
+node_modules/
+**/node_modules/
+
+# Secret passwords aur API keys private rakhni hain
+.env
+.env.*
+!.env.example
+
+# React ki generated build files ignore karni hain
+dist/
+**/dist/
+
+# Logs aur local temporary files ignore karni hain
+*.log
+.DS_Store
