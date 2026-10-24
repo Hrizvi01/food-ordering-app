@@ -89,8 +89,50 @@ app.get("/foods/:id", async (req, res) => {
 });
 
 
+ // Naya food item add karne ke liye POST API
+app.post("/foods", async (req, res) => {
 
+  try {
 
+    // Request body se food ka naam aur price le rahe hain
+    const { name, price } = req.body;
+
+    // Check kar rahe hain ke naam sahi text hai
+    if (typeof name !== "string" || name.trim() === "") {
+      return res.status(400).json({
+        error: "Valid food name required"
+      });
+    }
+
+    // Check kar rahe hain ke price positive number hai
+    if (typeof price !== "number" || !Number.isFinite(price) || price <= 0) {
+      return res.status(400).json({
+        error: "Valid price required"
+      });
+    }
+
+    // PostgreSQL mein naya food insert kar rahe hain
+    const result = await pool.query(
+      "INSERT INTO foods (name, price) VALUES ($1, $2) RETURNING *",
+      [name.trim(), price]
+    );
+
+    // Naya record successfully create hone par response bhej rahe hain
+    res.status(201).json(result.rows[0]);
+
+  } catch (error) {
+
+    // Error ki details backend terminal mein show kar rahe hain
+    console.error("Database error:", error.message);
+
+    // Server error ka response bhej rahe hain
+    res.status(500).json({
+      error: "Food add nahi ho saka"
+    });
+
+  }
+
+});
 
 // Server ka port .env se le rahe hain
 const PORT = process.env.PORT || 5000;
