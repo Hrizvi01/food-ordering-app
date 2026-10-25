@@ -246,3 +246,163 @@
     align-items: flex-start;
   }
 }
+
+
+
+/* Signup aur Login form */
+.auth-container {
+  max-width: 420px;
+  margin: 60px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.auth-container h2 {
+  margin-bottom: 22px;
+}
+
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-container input {
+  padding: 13px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.auth-container form button {
+  background: #ff7a00;
+  color: white;
+  padding: 13px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.auth-container form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-container p {
+  margin-top: 16px;
+}
+
+.auth-switch {
+  background: transparent;
+  color: #ff7a00;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.navbar-user button {
+  background: #e53935;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 14px;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .navbar-user {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+
+/* ========================================
+   LESSONS 21-23: ORDER STYLING
+======================================== */
+
+/* Place Order button */
+.place-order-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.place-order-btn:hover {
+  background-color: #15803d;
+}
+
+.place-order-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Order ka result message */
+.order-message {
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+/* Order history section */
+.orders-section {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 25px;
+}
+
+.orders-section h2 {
+  margin-bottom: 20px;
+}
+
+/* Har order ka card */
+.order-card {
+  background: white;
+  padding: 22px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Order number aur status */
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* Order status badge */
+.order-status {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.order-card p {
+  margin: 8px 0;
+}
+
+.order-card h3 {
+  margin-top: 10px;
+}

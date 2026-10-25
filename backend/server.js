@@ -1,5 +1,9 @@
+const authRoutes = require("./routes/auth");
+// Orders ki APIs import kar rahe hain
+const orderRoutes = require("./routes/orders");
 
- // Express import kar rahe hain taake server bana sakein
+
+// Express import kar rahe hain taake server bana sakein
 const express = require("express");
 
 // CORS import kar rahe hain taake frontend request bhej sake
@@ -298,10 +302,53 @@ app.delete("/foods/:id", async (req, res) => {
 
 });
 
+// Ek specific food ko ID se fetch karne ke liye API
+app.get("/foods/:id", async (req, res) => {
+  try {
 
+    // URL se food ki ID nikal rahe hain
+    const foodId = Number(req.params.id);
+
+    // Check kar rahe hain ke ID valid hai
+    if (!Number.isSafeInteger(foodId) || foodId <= 0) {
+      return res.status(400).json({
+        error: "Invalid food ID"
+      });
+    }
+
+    // PostgreSQL se specific food fetch kar rahe hain
+    const result = await pool.query(
+      "SELECT * FROM foods WHERE id = $1",
+      [foodId]
+    );
+
+    // Agar food database mein exist nahi karta
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Food not found"
+      });
+    }
+
+    // Food ki details frontend ko send kar rahe hain
+    res.json(result.rows[0]);
+
+  } catch (error) {
+
+    // Agar database ya server mein problem aaye
+    console.error(error.message);
+
+    res.status(500).json({
+      error: "Server error"
+    });
+  }
+});
 
 // Server ka port .env se le rahe hain
 const PORT = process.env.PORT || 5000;
+
+app.use("/auth", authRoutes);
+// /orders URLs ko orders router handle karega
+app.use("/orders", orderRoutes);
 
 // Backend server start kar rahe hain
 app.listen(PORT, () => {
