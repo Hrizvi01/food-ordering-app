@@ -2,24 +2,22 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-// Har food ka card display karne wala component
+// Har food item ka card display karne wala component
 function FoodCard({ food }) {
   return (
     <div className="food-card">
 
-      {/* Filhaal food ke liye common emoji use kar rahe hain */}
+      {/* Food ke liye filhaal common emoji */}
       <div className="food-image">🍽️</div>
 
       {/* Database se aane wala food name */}
       <h3>{food.name}</h3>
 
-      {/* Database se aane wali food price */}
+      {/* Database se aane wali price */}
       <p>Rs. {food.price}</p>
 
-      {/* Cart functionality baad mein banayenge */}
-      <button type="button">
-        Add to Cart
-      </button>
+      {/* Cart functionality future lesson mein banayenge */}
+      <button type="button">Add to Cart</button>
 
     </div>
   );
@@ -28,56 +26,81 @@ function FoodCard({ food }) {
 // Hamari application ka main component
 function App() {
 
-  // Database se aane wale foods store karenge
+  // Backend se aane wale foods store karenge
   const [foods, setFoods] = useState([]);
 
-  // Loading status store karenge
+  // Search box mein user jo likhega woh store hoga
+  const [search, setSearch] = useState("");
+
+  // API loading status
   const [loading, setLoading] = useState(true);
 
-  // API error ka message store karenge
+  // API error message
   const [error, setError] = useState("");
 
-  // Component mount hone par foods fetch karenge
+  // Search change hone par API se foods fetch karenge
   useEffect(() => {
 
-    // API se data mangwane wala async function
+    // Purani request cancel karne ke liye controller
+    const controller = new AbortController();
+
+    // Backend se food items mangwane wala function
     async function getFoods() {
+
+      // Nayi request shuru hone par loading true
+      setLoading(true);
+
+      // Purana error clear kar rahe hain
+      setError("");
 
       try {
 
-        // Express backend ko GET request bhej rahe hain
-        const response = await fetch(
-          "http://localhost:5000/foods"
-        );
+        // Search text ko URL ke liye safely encode kar rahe hain
+        const searchText = encodeURIComponent(search);
 
-        // Agar HTTP response successful nahi hai
+        // Search parameter ke saath API URL bana rahe hain
+        const url = `http://localhost:5000/foods?search=${searchText}`;
+
+        // Backend ko GET request bhej rahe hain
+        const response = await fetch(url, {
+          signal: controller.signal
+        });
+
+        // Agar server ne error status diya
         if (!response.ok) {
           throw new Error("Foods load nahi ho sake");
         }
 
-        // JSON response ko JavaScript data mein convert kar rahe hain
+        // JSON ko JavaScript data mein convert kar rahe hain
         const data = await response.json();
 
-        // API se aane wale foods state mein save kar rahe hain
+        // Foods ko React state mein save kar rahe hain
         setFoods(data);
 
       } catch (err) {
 
-        // Agar API request fail ho toh error save kar rahe hain
-        setError(err.message);
+        // Cancel hui request ko error nahi samjhenge
+        if (err.name !== "AbortError") {
+          setError(err.message);
+        }
 
       } finally {
 
-        // Request complete hone par loading false kar rahe hain
-        setLoading(false);
+        // Sirf active request ki loading end kar rahe hain
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
 
       }
     }
 
-    // Upar banaya hua function call kar rahe hain
+    // API function call kar rahe hain
     getFoods();
 
-  }, []);
+    // Search badalne par purani request cancel hogi
+    return () => controller.abort();
+
+  }, [search]);
 
   return (
     <div className="app">
@@ -94,31 +117,37 @@ function App() {
         <p>Order your favourite food online!</p>
       </section>
 
-      {/* Food menu */}
+      {/* Food menu section */}
       <section className="menu">
 
         <h2>Our Menu</h2>
 
-        {/* Jab tak API response nahi aata */}
-        {loading && <p>Loading foods...</p>}
+        {/* Search input field */}
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Search food..."
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
 
-        {/* Agar API request fail ho jaye */}
+        {/* API request ke dauran loading message */}
+        {loading && <p>Searching foods...</p>}
+
+        {/* Agar request fail ho jaye */}
         {error && <p className="error">{error}</p>}
 
-        {/* Agar database mein foods nahi hain */}
+        {/* Agar koi matching food na mile */}
         {!loading && !error && foods.length === 0 && (
-          <p>No foods available.</p>
+          <p>No foods found.</p>
         )}
 
-        {/* Food cards display kar rahe hain */}
+        {/* Database se aane wale food cards */}
         {!loading && !error && (
           <div className="food-grid">
 
             {foods.map((food) => (
-              <FoodCard
-                key={food.id}
-                food={food}
-              />
+              <FoodCard key={food.id} food={food} />
             ))}
 
           </div>
