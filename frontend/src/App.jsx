@@ -17,8 +17,27 @@ function App() {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [detailsError, setDetailsError] = useState("");
 
-  const [cart, setCart] = useState([]);
+  // Browser mein saved cart load karenge
+  const [cart, setCart] = useState(() => {
+    try {
+      const savedCart = localStorage.getItem("foodCart");
 
+      if (!savedCart) return [];
+
+      const parsedCart = JSON.parse(savedCart);
+
+      return Array.isArray(parsedCart) ? parsedCart : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Cart change hone par browser mein save karenge
+  useEffect(() => {
+    localStorage.setItem("foodCart", JSON.stringify(cart));
+  }, [cart]);
+
+  // Search ke mutabiq foods fetch karenge
   useEffect(() => {
     const controller = new AbortController();
 
@@ -56,6 +75,7 @@ function App() {
     return () => controller.abort();
   }, [search]);
 
+  // Selected food ki details fetch karenge
   useEffect(() => {
     if (selectedFoodId === null) return;
 
@@ -176,7 +196,6 @@ function App() {
             />
 
             {loading && <p>Loading foods...</p>}
-
             {error && <p className="error">{error}</p>}
 
             {!loading && !error && foods.length === 0 && (
