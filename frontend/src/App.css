@@ -78,3 +78,9 @@
 .food-card button:hover {
   background-color: #d96500;
 }
+
+/* API error ko red color mein show kar rahe hain */
+.error {
+  color: #d32f2f;
+  font-weight: bold;
+}
