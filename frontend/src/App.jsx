@@ -2,159 +2,233 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-// Har food item ka card display karne wala component
-function FoodCard({ food }) {
-  return (
-    <div className="food-card">
+import Cart from "./components/Cart";
+import FoodCard from "./components/FoodCard";
+import FoodDetails from "./components/FoodDetails";
 
-      {/* Food ke liye filhaal common emoji */}
-      <div className="food-image">🍽️</div>
-
-      {/* Database se aane wala food name */}
-      <h3>{food.name}</h3>
-
-      {/* Database se aane wali price */}
-      <p>Rs. {food.price}</p>
-
-      {/* Cart functionality future lesson mein banayenge */}
-      <button type="button">Add to Cart</button>
-
-    </div>
-  );
-}
-
-// Hamari application ka main component
 function App() {
-
-  // Backend se aane wale foods store karenge
   const [foods, setFoods] = useState([]);
-
-  // Search box mein user jo likhega woh store hoga
   const [search, setSearch] = useState("");
-
-  // API loading status
   const [loading, setLoading] = useState(true);
-
-  // API error message
   const [error, setError] = useState("");
 
-  // Search change hone par API se foods fetch karenge
-  useEffect(() => {
+  const [selectedFoodId, setSelectedFoodId] = useState(null);
+  const [selectedFood, setSelectedFood] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsError, setDetailsError] = useState("");
 
-    // Purani request cancel karne ke liye controller
+  const [cart, setCart] = useState([]);
+
+  useEffect(() => {
     const controller = new AbortController();
 
-    // Backend se food items mangwane wala function
     async function getFoods() {
-
-      // Nayi request shuru hone par loading true
       setLoading(true);
-
-      // Purana error clear kar rahe hain
       setError("");
 
       try {
-
-        // Search text ko URL ke liye safely encode kar rahe hain
         const searchText = encodeURIComponent(search);
 
-        // Search parameter ke saath API URL bana rahe hain
-        const url = `http://localhost:5000/foods?search=${searchText}`;
+        const response = await fetch(
+          `http://localhost:5000/foods?search=${searchText}`,
+          { signal: controller.signal }
+        );
 
-        // Backend ko GET request bhej rahe hain
-        const response = await fetch(url, {
-          signal: controller.signal
-        });
-
-        // Agar server ne error status diya
         if (!response.ok) {
           throw new Error("Foods load nahi ho sake");
         }
 
-        // JSON ko JavaScript data mein convert kar rahe hain
         const data = await response.json();
-
-        // Foods ko React state mein save kar rahe hain
         setFoods(data);
-
       } catch (err) {
-
-        // Cancel hui request ko error nahi samjhenge
         if (err.name !== "AbortError") {
           setError(err.message);
         }
-
       } finally {
-
-        // Sirf active request ki loading end kar rahe hain
         if (!controller.signal.aborted) {
           setLoading(false);
         }
-
       }
     }
 
-    // API function call kar rahe hain
     getFoods();
 
-    // Search badalne par purani request cancel hogi
     return () => controller.abort();
-
   }, [search]);
+
+  useEffect(() => {
+    if (selectedFoodId === null) return;
+
+    const controller = new AbortController();
+
+    async function getFoodDetails() {
+      setDetailsLoading(true);
+      setDetailsError("");
+      setSelectedFood(null);
+
+      try {
+        const response = await fetch(
+          `http://localhost:5000/foods/${selectedFoodId}`,
+          { signal: controller.signal }
+        );
+
+        if (!response.ok) {
+          throw new Error("Food details load nahi ho sake");
+        }
+
+        const data = await response.json();
+        setSelectedFood(data);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          setDetailsError(err.message);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setDetailsLoading(false);
+        }
+      }
+    }
+
+    getFoodDetails();
+
+    return () => controller.abort();
+  }, [selectedFoodId]);
+
+  function handleViewDetails(foodId) {
+    setSelectedFoodId(foodId);
+  }
+
+  function handleBack() {
+    setSelectedFoodId(null);
+    setSelectedFood(null);
+    setDetailsError("");
+  }
+
+  function handleAddToCart(food) {
+    setCart((previousCart) => {
+      const existingFood = previousCart.find(
+        (item) => item.id === food.id
+      );
+
+      if (existingFood) {
+        return previousCart.map((item) =>
+          item.id === food.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+
+      return [...previousCart, { ...food, quantity: 1 }];
+    });
+  }
+
+  function handleIncrease(foodId) {
+    setCart((previousCart) =>
+      previousCart.map((item) =>
+        item.id === foodId
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
+  }
+
+  function handleDecrease(foodId) {
+    setCart((previousCart) =>
+      previousCart
+        .map((item) =>
+          item.id === foodId
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  }
+
+  function handleRemoveFromCart(foodId) {
+    setCart((previousCart) =>
+      previousCart.filter((item) => item.id !== foodId)
+    );
+  }
 
   return (
     <div className="app">
-
-      {/* Website ka navigation bar */}
       <header className="navbar">
         <h2>🍽️ Food Court</h2>
         <span>Home | Menu | Cart</span>
       </header>
 
-      {/* Welcome section */}
-      <section className="hero">
-        <h1>Delicious Food Delivered to You</h1>
-        <p>Order your favourite food online!</p>
-      </section>
+      {selectedFoodId === null ? (
+        <>
+          <section className="hero">
+            <h1>Delicious Food Delivered to You</h1>
+            <p>Order your favourite food online!</p>
+          </section>
 
-      {/* Food menu section */}
-      <section className="menu">
+          <section className="menu">
+            <h2>Our Menu</h2>
 
-        <h2>Our Menu</h2>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search food..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
 
-        {/* Search input field */}
-        <input
-          type="text"
-          className="search-input"
-          placeholder="Search food..."
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
+            {loading && <p>Loading foods...</p>}
 
-        {/* API request ke dauran loading message */}
-        {loading && <p>Searching foods...</p>}
+            {error && <p className="error">{error}</p>}
 
-        {/* Agar request fail ho jaye */}
-        {error && <p className="error">{error}</p>}
+            {!loading && !error && foods.length === 0 && (
+              <p>No foods found.</p>
+            )}
 
-        {/* Agar koi matching food na mile */}
-        {!loading && !error && foods.length === 0 && (
-          <p>No foods found.</p>
-        )}
+            {!loading && !error && (
+              <div className="food-grid">
+                {foods.map((food) => (
+                  <FoodCard
+                    key={food.id}
+                    food={food}
+                    onViewDetails={handleViewDetails}
+                    onAddToCart={handleAddToCart}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        </>
+      ) : (
+        <>
+          {detailsLoading && (
+            <p className="details-message">
+              Loading food details...
+            </p>
+          )}
 
-        {/* Database se aane wale food cards */}
-        {!loading && !error && (
-          <div className="food-grid">
+          {detailsError && (
+            <div className="details-message">
+              <p className="error">{detailsError}</p>
+              <button type="button" onClick={handleBack}>
+                Back to Menu
+              </button>
+            </div>
+          )}
 
-            {foods.map((food) => (
-              <FoodCard key={food.id} food={food} />
-            ))}
+          {!detailsLoading && !detailsError && selectedFood && (
+            <FoodDetails
+              food={selectedFood}
+              onBack={handleBack}
+            />
+          )}
+        </>
+      )}
 
-          </div>
-        )}
-
-      </section>
-
+      <Cart
+        cart={cart}
+        onRemove={handleRemoveFromCart}
+        onIncrease={handleIncrease}
+        onDecrease={handleDecrease}
+      />
     </div>
   );
 }

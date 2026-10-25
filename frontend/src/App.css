@@ -109,3 +109,140 @@
   color: #d32f2f;
   font-weight: bold;
 }
+
+
+/* Food details ka main container */
+.food-details {
+  max-width: 650px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+/* Details card ki styling */
+.details-card {
+  margin-top: 25px;
+  padding: 40px;
+  background-color: white;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Food details ke buttons */
+.food-details button,
+.details-message button {
+  background-color: #ff7a00;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  cursor: pointer;
+}
+
+/* Food details ki price */
+.details-card h3 {
+  color: #e76f00;
+}
+
+/* Loading aur error messages */
+.details-message {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+
+
+/* Shopping cart ka main container */
+.cart-section {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 25px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Cart ke har food item ka design */
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid #dddddd;
+}
+
+/* Cart ke buttons */
+.cart-item button {
+  background-color: #e53935;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Food card ke buttons mein spacing */
+.food-card button {
+  margin: 5px;
+}
+
+
+/* Cart quantity aur remove buttons */
+.cart-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.quantity-controls button {
+  background-color: #ff7a00;
+  color: white;
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.quantity-controls span {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.cart-item .remove-btn {
+  background-color: #e53935;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  border-top: 2px solid #eeeeee;
+  padding-top: 15px;
+}
+
+@media (max-width: 480px) {
+  .cart-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cart-actions {
+    align-items: flex-start;
+  }
+}
