@@ -3,6 +3,7 @@ const authRoutes = require("./routes/auth");
 const orderRoutes = require("./routes/orders");
 
 
+
 // Express import kar rahe hain taake server bana sakein
 const express = require("express");
 
@@ -349,6 +350,33 @@ const PORT = process.env.PORT || 5000;
 app.use("/auth", authRoutes);
 // /orders URLs ko orders router handle karega
 app.use("/orders", orderRoutes);
+
+
+
+// Backend aur PostgreSQL check karne ke liye API
+// Server aur database connection test karne ke liye API
+app.get("/health", async (req, res) => {
+  try {
+    // PostgreSQL ko simple query bhej rahe hain
+    await pool.query("SELECT 1");
+
+    // Database successfully connected hai
+    res.json({
+      status: "OK",
+      server: "running",
+      database: "connected"
+    });
+
+  } catch (error) {
+    // Database connection fail hone par error show karenge
+    console.error("Health check error:", error);
+
+    res.status(503).json({
+      status: "ERROR",
+      database: "disconnected"
+    });
+  }
+});
 
 // Backend server start kar rahe hain
 app.listen(PORT, () => {
