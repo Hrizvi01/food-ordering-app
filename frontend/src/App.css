@@ -406,3 +406,29 @@
 .order-card h3 {
   margin-top: 10px;
 }
+
+
+/* Currency converter ka main box */
+.currency-converter {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 25px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Converter ka input field */
+.currency-converter input {
+  width: 100%;
+  padding: 12px;
+  margin: 12px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+/* Converted amount ko highlight karenge */
+.currency-converter h3 {
+  color: #15803d;
+  margin-top: 15px;
+}

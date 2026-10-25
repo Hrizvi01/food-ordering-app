@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import "./App.css";
+import CurrencyConverter from "./components/CurrencyConverter";
 
 import Cart from "./components/Cart";
 import FoodCard from "./components/FoodCard";
@@ -353,6 +354,8 @@ function App() {
 
           {/* Customer ke previous orders */}
           <OrderHistory refreshKey={ordersRefreshKey} />
+          {/* External API se currency conversion show karenge */}
+          <CurrencyConverter />
         </>
       )}
     </div>
